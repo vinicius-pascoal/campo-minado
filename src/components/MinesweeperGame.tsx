@@ -157,16 +157,16 @@ export default function MinesweeperGame() {
   };
 
   const getCellSize = () => {
-    if (!difficulty) return 'w-10 h-10';
+    if (!difficulty) return 'w-10 h-10 sm:w-10 sm:h-10';
 
     const config = DIFFICULTY_CONFIGS[difficulty];
-    if (config.rows <= 8) return 'w-12 h-12 text-lg';
-    if (config.rows <= 12) return 'w-10 h-10 text-base';
-    return 'w-8 h-8 text-sm';
+    if (config.rows <= 8) return 'w-9 h-9 sm:w-12 sm:h-12 text-sm sm:text-lg';
+    if (config.rows <= 12) return 'w-6 h-6 sm:w-10 sm:h-10 text-xs sm:text-base';
+    return 'w-4 h-4 sm:w-8 sm:h-8 text-[10px] sm:text-sm';
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-1 sm:p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
       <DifficultyModal
         isOpen={difficulty === null}
         onSelectDifficulty={startNewGame}
@@ -176,37 +176,37 @@ export default function MinesweeperGame() {
 
       {difficulty && (
         <>
-          <div className="mb-6 flex flex-col items-center gap-4">
-            <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+          <div className="mb-2 sm:mb-6 flex flex-col items-center gap-1.5 sm:gap-4 w-full px-1">
+            <h1 className="text-xl sm:text-4xl font-bold text-gray-800 dark:text-white">
               Campo Minado
             </h1>
 
-            <div className="flex gap-4 items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-lg shadow-md">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🚩</span>
-                <span className="font-bold text-xl text-gray-800 dark:text-white">
+            <div className="flex gap-2 sm:gap-4 items-center bg-white dark:bg-gray-800 px-2 sm:px-6 py-1.5 sm:py-3 rounded-md sm:rounded-lg shadow-md">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-base sm:text-2xl">🚩</span>
+                <span className="font-bold text-sm sm:text-xl text-gray-800 dark:text-white">
                   {flagsRemaining}
                 </span>
               </div>
 
-              <div className="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+              <div className="w-px h-5 sm:h-8 bg-gray-300 dark:bg-gray-600"></div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">⏱️</span>
-                <span className="font-mono font-bold text-xl text-gray-800 dark:text-white">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-base sm:text-2xl">⏱️</span>
+                <span className="font-mono font-bold text-sm sm:text-xl text-gray-800 dark:text-white">
                   {formatTime(time)}
                 </span>
               </div>
             </div>
 
             {(gameOver || gameWon) && (
-              <div className="text-center">
-                <div className={`text-3xl font-bold mb-2 ${gameWon ? 'text-green-600' : 'text-red-600'
+              <div className="text-center px-2">
+                <div className={`text-lg sm:text-3xl font-bold mb-1 sm:mb-2 ${gameWon ? 'text-green-600' : 'text-red-600'
                   }`}>
                   {gameWon ? '🎉 Você Venceu! 🎉' : '💥 Game Over! 💥'}
                 </div>
                 {gameWon && (
-                  <div className="text-gray-700 dark:text-gray-300">
+                  <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                     Tempo: {formatTime(time)}
                   </div>
                 )}
@@ -215,14 +215,14 @@ export default function MinesweeperGame() {
 
             <button
               onClick={() => setDifficulty(null)}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1.5 px-3 sm:py-2 sm:px-6 rounded-md sm:rounded-lg transition-colors duration-200 text-xs sm:text-base"
             >
               {gameOver || gameWon ? 'Jogar Novamente' : 'Nova Partida'}
             </button>
           </div>
 
-          <div className="bg-gray-400 dark:bg-gray-600 p-2 rounded-lg shadow-2xl">
-            <div className="inline-block border-4 border-gray-500 dark:border-gray-700 rounded">
+          <div className="bg-gray-400 dark:bg-gray-600 p-0.5 sm:p-2 rounded shadow-2xl overflow-x-auto max-w-full">
+            <div className="inline-block border sm:border-4 border-gray-500 dark:border-gray-700 rounded">
               {board.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                   {row.map((cell, colIndex) => (
@@ -232,7 +232,7 @@ export default function MinesweeperGame() {
                       onContextMenu={(e) => handleCellRightClick(e, rowIndex, colIndex)}
                       className={`
                         ${getCellSize()}
-                        border-2 border-gray-400 dark:border-gray-700
+                        border border-gray-400 dark:border-gray-700 sm:border-2
                         font-bold
                         transition-all duration-150
                         ${cell.isRevealed
