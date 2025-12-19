@@ -22,6 +22,8 @@ export default function MinesweeperGame() {
   const [flagsRemaining, setFlagsRemaining] = useState(0);
   const [time, setTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [flagMode, setFlagMode] = useState(false); // Modo bandeira para mobile
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Timer
   useEffect(() => {
@@ -46,10 +48,22 @@ export default function MinesweeperGame() {
     setFlagsRemaining(config.mines);
     setTime(0);
     setIsTimerRunning(false);
+    setFlagMode(false); // Reset flag mode
   }, []);
 
   const handleCellClick = (row: number, col: number) => {
-    if (gameOver || gameWon || board[row][col].isFlagged || board[row][col].isRevealed) {
+    if (gameOver || gameWon || board[row][col].isRevealed) {
+      return;
+    }
+
+    // Se está no modo bandeira ou a célula já tem bandeira
+    if (flagMode) {
+      toggleFlag(row, col);
+      return;
+    }
+
+    // Impede revelar células com bandeira
+    if (board[row][col].isFlagged) {
       return;
     }
 
@@ -95,9 +109,7 @@ export default function MinesweeperGame() {
     }
   };
 
-  const handleCellRightClick = (e: React.MouseEvent, row: number, col: number) => {
-    e.preventDefault();
-
+  const toggleFlag = (row: number, col: number) => {
     if (gameOver || gameWon || board[row][col].isRevealed || firstClick) {
       return;
     }
@@ -114,6 +126,30 @@ export default function MinesweeperGame() {
     );
 
     setBoard(newBoard);
+  };
+
+  const handleCellRightClick = (e: React.MouseEvent, row: number, col: number) => {
+    e.preventDefault();
+    toggleFlag(row, col);
+  };
+
+  // Handlers para toque longo (long press)
+  const handleTouchStart = (row: number, col: number) => {
+    const timer = setTimeout(() => {
+      // Vibração tátil se disponível
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      toggleFlag(row, col);
+    }, 500); // 500ms para long press
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
   };
 
   const getCellContent = (cell: Cell) => {
@@ -199,6 +235,28 @@ export default function MinesweeperGame() {
               </div>
             </div>
 
+            {/* Botão de alternância de modo para mobile */}
+            <button
+              onClick={() => setFlagMode(!flagMode)}
+              className={`
+                sm:hidden px-4 py-2 rounded-lg font-bold text-sm transition-all duration-200 shadow-md
+                ${flagMode
+                  ? 'bg-orange-500 text-white ring-2 ring-orange-300'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
+                }
+              `}
+            >
+              {flagMode ? '🚩 Modo Bandeira' : '👆 Modo Revelar'}
+            </button>
+
+            <div className="hidden sm:block text-xs text-gray-600 dark:text-gray-400 text-center">
+              Clique direito para colocar bandeira
+            </div>
+
+            <div className="sm:hidden text-xs text-gray-600 dark:text-gray-400 text-center px-2">
+              {flagMode ? 'Toque para colocar/remover bandeira' : 'Toque longo ou use o botão acima para bandeiras'}
+            </div>
+
             {(gameOver || gameWon) && (
               <div className="text-center px-2">
                 <div className={`text-lg sm:text-3xl font-bold mb-1 sm:mb-2 ${gameWon ? 'text-green-600' : 'text-red-600'
@@ -230,6 +288,9 @@ export default function MinesweeperGame() {
                       key={`${rowIndex}-${colIndex}`}
                       onClick={() => handleCellClick(rowIndex, colIndex)}
                       onContextMenu={(e) => handleCellRightClick(e, rowIndex, colIndex)}
+                      onTouchStart={() => handleTouchStart(rowIndex, colIndex)}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchMove={handleTouchEnd}
                       className={`
                         ${getCellSize()}
                         border border-gray-400 dark:border-gray-700 sm:border-2
@@ -242,6 +303,7 @@ export default function MinesweeperGame() {
                           : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 shadow-sm'
                         }
                         ${cell.isRevealed && cell.adjacentMines > 0 && getCellColor(cell.adjacentMines)}
+                        ${flagMode && !cell.isRevealed ? 'ring-1 ring-orange-400' : ''}
                         disabled:cursor-default
                         active:shadow-inner
                       `}
