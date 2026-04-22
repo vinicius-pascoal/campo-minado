@@ -202,7 +202,7 @@ export default function MinesweeperGame() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-1 sm:p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-1 sm:p-4 overflow-x-hidden">
       <DifficultyModal
         isOpen={difficulty === null}
         onSelectDifficulty={startNewGame}
